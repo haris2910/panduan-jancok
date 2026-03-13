@@ -46,6 +46,10 @@
             z-index: 100;
         }
 
+        /* Custom Scrollbar for Sidebar */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
         .sidebar-brand {
             padding: 0 25px 20px 25px;
             border-bottom: 1px solid var(--border);
@@ -136,6 +140,15 @@
         }
         .btn-yellow:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
 
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+        .btn-outline:hover {
+            background-color: rgba(234, 179, 8, 0.1);
+        }
+
         /* --- INFO BOX --- */
         .info-box {
             background-color: var(--bg-card);
@@ -184,6 +197,25 @@
         .step-highlight ol, .step-highlight ul { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
         .step-highlight li { margin-bottom: 12px; line-height: 1.6; }
         .step-highlight .important-text { color: var(--accent); font-weight: bold; background-color: rgba(234, 179, 8, 0.1); padding: 2px 5px; border-radius: 4px;}
+
+        /* --- FAQ ACCORDION STYLE --- */
+        .faq-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 20px;
+        }
+        .faq-item h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            gap: 10px;
+        }
+        .faq-item h4::before { content: 'Q:'; color: var(--text-muted); }
+        .faq-item p { margin-bottom: 0; color: var(--text-main); }
+        .faq-item p::before { content: 'A: '; font-weight: bold; color: var(--success); }
 
         /* --- CARDS GRID --- */
         .card-grid {
@@ -368,11 +400,21 @@
         <div class="menu-category">Tahap 1: Persiapan</div>
         <ul class="nav-list" id="nav-container">
             <li class="nav-item active" onclick="switchSection('setup-webkus', this)">⚙️ Setup Webkus</li>
-            <li class="nav-item" onclick="switchSection('pendahuluan', this)">🚀 Info Bot & Fitur</li>
+            <li class="nav-item" onclick="switchSection('setup-telegram', this)">🤖 Data Bot & Script</li>
+            <li class="nav-item" onclick="switchSection('pendahuluan', this)">🚀 Info Fitur & File</li>
+        </ul>
+
+        <div class="menu-category">Tahap 2: Instalasi Bot</div>
+        <ul class="nav-list">
             <li class="nav-item" onclick="switchSection('vps', this)">💻 VPS (Server)</li>
             <li class="nav-item" onclick="switchSection('termux', this)">📱 Termux (HP)</li>
             <li class="nav-item" onclick="switchSection('cmd', this)">🪟 CMD (Windows)</li>
-            <li class="nav-item" onclick="switchSection('kontak', this)">👨‍💻 Developer</li>
+        </ul>
+
+        <div class="menu-category">Bantuan & FAQ</div>
+        <ul class="nav-list">
+            <li class="nav-item" onclick="switchSection('faq', this)">❓ Tanya Jawab (FAQ)</li>
+            <li class="nav-item" onclick="switchSection('kontak', this)">👨‍💻 Admin</li>
         </ul>
     </aside>
 
@@ -396,10 +438,6 @@
                     <li>Lakukan registrasi dengan mengeklik tombol <strong>Buat Toko Sekarang - Gratis</strong>.</li>
                     <li>Pada tampilan dashboard Webkus, klik menu <strong>UBAH WEBSITE</strong>.</li>
                     <li>Masukkan <strong>Nama Toko</strong>, <strong>Deskripsi Toko</strong>, <strong>Logo</strong>, dan <strong>URL Kontak</strong>. Kosongkan bagian <i>Webhook URL</i>, kemudian klik <strong>Simpan Perubahan</strong>.</li>
-                    <li>Klik menu <strong>Ganti Nama Domain</strong>. Karena kita akan integrasi dengan bot Telegram, cukup edit bagian <i>Subdomain</i> dan sesuaikan saja dengan nama store kalian. Kemudian klik <strong>Simpan Perubahan</strong>.
-                        <br><br>
-                        <span class="important-text">💡 INFO PENTING:</span> Subdomain inilah yang nantinya wajib dimasukkan ke dalam variabel <code>BASE_URL</code> pada script kode bot!
-                    </li>
                 </ol>
             </div>
 
@@ -427,11 +465,62 @@
             </div>
 
             <div class="info-box success">
-                <p style="margin-bottom:0;"><strong>🎉 Toko Webkus Sudah Siap!</strong> Setelah produk, harga, dan stok CSV berhasil diatur, Bosku siap untuk merakit botnya. Silakan lanjut ke halaman Info Bot!</p>
+                <p style="margin-bottom:0;"><strong>🎉 Toko Webkus Sudah Siap!</strong> Setelah produk, harga, dan stok CSV berhasil diatur, Bosku siap untuk mengumpulkan data Bot Telegramnya!</p>
             </div>
             
-            <button class="btn-yellow" onclick="switchSection('pendahuluan', document.querySelectorAll('.nav-item')[1])">Lanjut ke Info Bot ➔</button>
+            <button class="btn-yellow" onclick="switchSection('setup-telegram', document.querySelectorAll('.nav-item')[1])">Lanjut Ambil Data Bot ➔</button>
+        </section>
 
+        <!-- SECTION: SETUP TELEGRAM BOT (BARU) -->
+        <section id="setup-telegram" class="section">
+            <h1>Langkah 2: <span>Data Bot & Script</span></h1>
+            <p class="author-text">Cara Mendapatkan BASE_URL, Token & ID Admin untuk Script</p>
+
+            <div class="info-box warning">
+                <p>Di dalam script <code>bot.js</code>, ada 3 data wajib yang <strong>HARUS</strong> Bosku isi di bagian paling atas. Jika salah satu kosong atau salah, bot tidak akan jalan. Berikut cara mencari ketiganya:</p>
+            </div>
+
+            <div class="step-highlight">
+                <h3>A. Cara Mendapatkan BASE_URL (Link Webkus)</h3>
+                <p>Ini adalah alamat toko Bosku agar bot tahu kemana ia harus mengambil data produk.</p>
+                <ol>
+                    <li>Buka dashboard <strong>Webkus</strong> Bosku.</li>
+                    <li>Klik menu <strong>Ganti Nama Domain</strong> di sebelah kiri.</li>
+                    <li>Silakan edit nama subdomain sesuai nama toko Bosku, lalu klik <strong>Simpan Perubahan</strong>.</li>
+                    <li>Salin (Copy) link domain tersebut. (Contoh: <code>https://toko-bosku.webkus.com</code>)</li>
+                    <li><span class="important-text">INGAT:</span> Jangan pakai garis miring (<code>/</code>) di bagian paling akhir link!</li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>B. Cara Mendapatkan BOT_TOKEN</h3>
+                <p>Token ini ibarat "nyawa" agar script bisa mengendalikan bot Bosku.</p>
+                <ol>
+                    <li>Buka aplikasi Telegram, ketik <strong>@BotFather</strong> di kolom pencarian, lalu klik Start.</li>
+                    <li>Ketik perintah <code>/newbot</code> dan kirim.</li>
+                    <li>BotFather akan meminta nama bot. Masukkan nama toko Bosku (Contoh: <em>Jancok Store</em>).</li>
+                    <li>Selanjutnya, masukkan <strong>Username Bot</strong>. Username ini WAJIB diakhiri dengan kata `bot` (Contoh: <em>jancokstore_bot</em> atau <em>JancokStoreBot</em>).</li>
+                    <li>Jika berhasil, BotFather akan mengirimkan pesan panjang. Cari tulisan <strong>Use this token to access the HTTP API:</strong></li>
+                    <li>Salin (Copy) kode token panjang tersebut (Contoh: <code>1234567890:ABCdefGhIJKlmNoPQRstUVwxyZ</code>).</li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>C. Cara Mendapatkan ADMIN_ID</h3>
+                <p>ID ini digunakan agar fitur rahasia (seperti Broadcast) hanya bisa diakses oleh Bosku saja sebagai Admin.</p>
+                <ol>
+                    <li>Buka aplikasi Telegram, ketik <strong>@userinfobot</strong> di kolom pencarian, lalu klik Start.</li>
+                    <li>Bot akan langsung membalas dengan detail profil Bosku.</li>
+                    <li>Cari baris yang bertuliskan <strong>Id:</strong> (biasanya berupa deretan angka panjang).</li>
+                    <li>Salin (Copy) angka tersebut (Contoh: <code>8551325253</code>).</li>
+                </ol>
+            </div>
+
+            <div class="info-box success">
+                <p style="margin-bottom:0;"><strong>✅ Persiapan Selesai!</strong> Sekarang Bosku sudah mengumpulkan <code>BASE_URL</code>, <code>BOT_TOKEN</code>, dan <code>ADMIN_ID</code>. Bosku sudah siap 100% untuk masuk ke tahap instalasi script di server!</p>
+            </div>
+
+            <button class="btn-yellow" onclick="switchSection('pendahuluan', document.querySelectorAll('.nav-item')[2])">Lanjut ke Info Bot & Fitur ➔</button>
         </section>
 
         <!-- SECTION: PENDAHULUAN & FITUR -->
@@ -444,56 +533,51 @@
             <div class="info-box">
                 <p><strong>🖥️ Base Mesin:</strong> Node.js (V8 Engine)</p>
                 <p><strong>📦 Framework:</strong> Telegraf.js & Axios</p>
-                <p style="margin-bottom:0;"><strong>🗄️ Database:</strong> Local Flat-File (<code>sessions.json</code>, <code>users.txt</code>)</p>
+                <p style="margin-bottom:0;"><strong>🗄️ Database:</strong> Local Flat-File (Tanpa MySQL, anti lemot!)</p>
             </div>
 
-            <h2>Fitur Utama & Keunggulan</h2>
-            <p>Mesin ini menanamkan sistem <i>Smart Cache</i> dan algoritma <i>Asynchronous</i> agar bot sangat "Badak" melayani ribuan pembeli 24 jam nonstop.</p>
-
+            <h2>🔥 Fitur Utama & Keunggulan</h2>
             <div class="card-grid">
                 <div class="card">
                     <div class="card-icon">🛍️</div>
                     <h3>Auto-Payment & Delivery</h3>
-                    <p>Bot melakukan polling (pengecekan) pembayaran ke Webkus setiap 8 detik dan mengirim data akun secara instan ke Telegram jika saldo terkonfirmasi.</p>
+                    <p>Bot melakukan polling pembayaran ke Webkus setiap 8 detik dan mengirim data akun secara instan jika saldo masuk.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">🛡️</div>
                     <h3>Smart Cache (Anti-Limit 429)</h3>
-                    <p>Sistem memori pintar yang menahan spam klik tombol + / - dari pelanggan. Dijamin 100% bebas dari blokir (Error 429) Cloudflare Webkus.</p>
+                    <p>Sistem memori pintar dengan <i>Auto-Retry</i>. Dijamin 100% kebal dari blokir Cloudflare meskipun diborong pembeli.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">⌨️</div>
                     <h3>Input Qty Manual Bersih</h3>
-                    <p>Pelanggan bisa menekan tombol "Isi Manual" dan mengetik angka borongan (misal: 100). Chat otomatis dibersihkan agar riwayat Telegram tetap rapi.</p>
+                    <p>Pembeli bisa ketik angka borongan (misal: 100 pcs). Chat otomatis dibersihkan agar riwayat Telegram tetap rapi.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">📣</div>
                     <h3>Broadcast Admin Pro</h3>
-                    <p>Admin bisa menyebarkan promosi (Teks, Foto, Video, Suara, File). Dilengkapi sistem <i>Flood Control</i> (Jeda aman) agar bot terhindar dari Banned API Telegram.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📜</div>
-                    <h3>Smart Pagination UI</h3>
-                    <p>Menu Riwayat dan Testimoni menggunakan sistem Halaman (Next/Prev). Mencegah bot mogok akibat batas maksimal huruf pesan Telegram (4000 karakter).</p>
+                    <p>Admin bisa menyebarkan promosi (Foto, Video, Suara, File) dengan aman tanpa resiko akun bot di-banned.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">🤖</div>
                     <h3>Global Error Shield</h3>
-                    <p>Tameng gaib <code>bot.catch()</code> menelan semua error jaringan/API secara diam-diam. Log PM2 Bosku dijamin bersih tanpa tulisan error merah sedikitpun.</p>
+                    <p>Tameng gaib yang menelan semua error jaringan secara diam-diam. Log server Bosku dijamin bersih dari tulisan error merah.</p>
                 </div>
             </div>
             
-            <h2 style="margin-top: 40px;">🔑 Konsep Kunci: Konfigurasi Wajib</h2>
-            <div class="info-box danger">
-                <p>Sebelum menjalankan bot di metode manapun (VPS/Termux/CMD), Bosku <strong>WAJIB HUKUMNYA</strong> untuk mengedit 3 baris kode di bagian paling atas script <code>bot.js</code> yang diberikan oleh Admin. Jika tidak, bot tidak akan terhubung.</p>
-                <ul>
-                    <li><code>BOT_TOKEN</code> : Dari bot <strong>@BotFather</strong> di Telegram.</li>
-                    <li><code>ADMIN_ID</code> : ID Telegram pribadi Bosku (Berupa deretan angka, cek di @userinfobot).</li>
-                    <li><code>BASE_URL</code> : Link toko Webkus Bosku (Contoh: <code>https://toko-bosku.webkus.com</code> tanpa garis miring di akhir).</li>
+            <h2 style="margin-top: 40px;">📂 File Database Otomatis (Auto-Save)</h2>
+            <p>Setelah bot dijalankan pertama kali, jangan kaget jika tiba-tiba muncul file-file baru di dalam folder bot Bosku. Ini adalah file database lokal yang dibuat secara otomatis oleh sistem:</p>
+            
+            <div class="step-highlight" style="padding: 20px;">
+                <ul style="margin-bottom: 0;">
+                    <li><strong style="color: var(--accent);">users.txt</strong> <br>Menyimpan daftar ID dan Nama pengguna yang pernah menggunakan bot. File ini dibaca saat Bosku melakukan Broadcast pesan.</li>
+                    <li style="margin-top: 15px;"><strong style="color: var(--accent);">sessions.json</strong> <br>Menyimpan status keranjang belanja sementara dari setiap pembeli, agar pesanan mereka tidak hilang jika bot direstart.</li>
+                    <li style="margin-top: 15px;"><strong style="color: var(--accent);">history.json</strong> <br>Menyimpan riwayat transaksi terakhir dari masing-masing pembeli (termasuk menyimpan data akun yang sudah dibeli).</li>
+                    <li style="margin-top: 15px;"><strong style="color: var(--accent);">testimoni.json</strong> <br>Menyimpan ulasan, pesan, dan rating (bintang) yang dikirimkan oleh pembeli setelah pesanan selesai.</li>
                 </ul>
             </div>
             
-            <p>Pilih OS (Sistem) yang Bosku gunakan untuk menjalankan bot di menu navigasi ya!</p>
+            <p style="text-align: center; margin-top: 40px; font-weight: bold;">Pilih OS (Sistem) yang Bosku gunakan untuk menginstal bot di menu navigasi ya!</p>
         </section>
 
         <!-- ================= SECTION: VPS ================= -->
@@ -725,16 +809,52 @@ pm2 logs</code></pre>
             </div>
         </section>
 
+        <!-- ================= SECTION: FAQ (BARU) ================= -->
+        <section id="faq" class="section">
+            <h1>Tanya Jawab <span>(FAQ)</span></h1>
+            <p class="author-text">Solusi cepat untuk masalah yang sering ditanyakan pembeli.</p>
+
+            <div class="faq-item">
+                <h4>Bagaimana cara merestart bot setelah saya mengedit kode bot.js?</h4>
+                <p>Buka terminal/CMD di dalam folder bot Anda, lalu ketik perintah <code>pm2 restart jancok-store</code>. Perubahan kode Anda akan langsung aktif tanpa mematikan bot secara total.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Kenapa bot saya tidak mau membalas pesan / klik menu di Telegram?</h4>
+                <p>Coba cek log bot Anda dengan mengetik <code>pm2 logs</code>. Pastikan tidak ada pesan error berwarna merah. Jika bot mati, cek kembali apakah <code>BOT_TOKEN</code> yang Anda masukkan sudah benar dan tidak ada spasi kosong di depan/belakang token.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Bagaimana cara mengubah harga atau menambah produk baru?</h4>
+                <p>Kabar baiknya, Anda tidak perlu mengedit kode bot sama sekali! Silakan login ke dashboard website <strong>Webkus</strong> Anda, lalu edit harga, deskripsi, atau tambah produk dari sana. Bot Telegram Anda akan otomatis membaca data Webkus terbaru secara real-time saat pelanggan menekan tombol Belanja.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Muncul pesan "Checkout Gagal. Server sibuk" saat pelanggan membeli?</h4>
+                <p>Ini bukan error dari script bot, melainkan server Webkus sedang penuh/down (mengalami <i>504 Gateway Timeout</i>). Bot ini sudah dilengkapi fitur <strong>Auto-Retry</strong>. Minta pelanggan menunggu sebentar dan mencoba checkout lagi dalam 1-2 menit ke depan.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Saya ingin mematikan bot sementara waktu, bagaimana caranya?</h4>
+                <p>Buka terminal/CMD, lalu ketik perintah <code>pm2 stop jancok-store</code>. Jika ingin menyalakannya kembali, cukup ketik <code>pm2 start jancok-store</code>.</p>
+            </div>
+        </section>
+
         <!-- SECTION: KONTAK -->
         <section id="kontak" class="section">
-            <h1>Hubungi <span>Developer</span></h1>
-            <p class="author-text">Butuh bantuan teknis, mau custom fitur, atau error tidak wajar?</p>
+            <h1>Hubungi <span>Admin</span></h1>
+            <p class="author-text">Butuh bantuan teknis, instalasi dibantu, atau mau custom fitur?</p>
 
             <div class="card" style="max-width: 400px; text-align: center; margin: 40px auto; padding: 40px 20px; border-color: var(--accent);">
                 <div class="card-icon" style="font-size: 3.5rem; margin-bottom: 20px; background: none; border: none;">👨‍💻</div>
                 <h3 style="font-size: 1.8rem; color: var(--accent);">BangLeoNz</h3>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">Spesialis Jasa Pembuatan Bot Telegram & Automasi Script Webkus.</p>
-                <a href="https://t.me/BangLeoNz" target="_blank" class="btn-yellow" style="margin-bottom: 0; width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px;">Kirim Pesan Telegram ➔</a>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Admin Pengelola Bot Telegram & Setup Script Jancok Engine.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <a href="https://t.me/BangLeoNz" target="_blank" class="btn-yellow" style="margin-bottom: 0; width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px;">Kirim Pesan Telegram ➔</a>
+                    
+                    <a href="https://trakteer.id/bangleonz" target="_blank" class="btn-outline" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; transition: 0.2s; width: 100%; justify-content: center; font-size: 1rem;">☕ Traktir Admin Kopi</a>
+                </div>
             </div>
         </section>
 
