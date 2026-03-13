@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dokumentasi Jancok Engine V104</title>
+    <style>
+        /* CSS Reset & Variables (Dark Theme ala Webkus API) */
+        :root {
+            --bg-body: #0d1117;        
+            --bg-sidebar: #161b22;     
+            --bg-card: #1c2128;        
+            --bg-code: #010409;        
+            --text-main: #e6edf3;      
+            --text-muted: #8b949e;     
+            --accent: #eab308;         
+            --accent-hover: #ca8a04;
+            --border: #30363d;         
+            --danger: #f85149;         
+            --success: #2ea043;        
+            --info-bg: #1f2937;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR (DESKTOP) --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 0 25px 20px 25px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            color: var(--text-main);
+        }
+
+        .sidebar-brand h2 span {
+            background-color: var(--accent);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 900;
+        }
+
+        .menu-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 10px 25px;
+            margin-top: 10px;
+        }
+
+        .nav-list { list-style: none; }
+
+        .nav-item {
+            padding: 10px 25px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+        }
+
+        .nav-item:hover { color: var(--text-main); background-color: rgba(255,255,255,0.05); }
+        .nav-item.active { color: var(--accent); border-left-color: var(--accent); background-color: rgba(234, 179, 8, 0.05); font-weight: 600; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: 280px;
+            padding: 50px 60px;
+            flex-grow: 1;
+            max-width: 1100px;
+        }
+
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; line-height: 1.2; }
+        h1 span { color: var(--accent); }
+        h2 { font-size: 1.5rem; margin: 40px 0 15px 0; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; line-height: 1.3;}
+        p { margin-bottom: 15px; color: var(--text-muted); }
+        strong { color: var(--text-main); }
+        
+        .author-text { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; display: inline-block;}
+
+        /* --- YELLOW BUTTON --- */
+        .btn-yellow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--accent);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 30px;
+            width: fit-content;
+        }
+        .btn-yellow:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+
+        /* --- INFO BOX --- */
+        .info-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+        .info-box.warning { border-left: 4px solid var(--accent); }
+        .info-box.danger { border-left: 4px solid var(--danger); }
+        .info-box.success { border-left: 4px solid var(--success); }
+        
+        code { 
+            background-color: rgba(255,255,255,0.1); 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            color: var(--accent); 
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            word-break: break-word;
+        }
+
+        /* --- HIGHLIGHT STEPS (Teks Jelas) --- */
+        .step-highlight {
+            background-color: var(--info-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px 30px;
+            margin: 20px 0 30px 0;
+        }
+        
+        .step-highlight h3 {
+            color: var(--text-main);
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        
+        .step-highlight h3::before { content: '📌'; font-size: 1.2rem; }
+        
+        .step-highlight ol, .step-highlight ul { margin-left: 20px; color: var(--text-muted); margin-bottom: 15px;}
+        .step-highlight li { margin-bottom: 12px; line-height: 1.6; }
+        .step-highlight .important-text { color: var(--accent); font-weight: bold; background-color: rgba(234, 179, 8, 0.1); padding: 2px 5px; border-radius: 4px;}
+
+        /* --- CARDS GRID --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .card:hover { border-color: #4b5563; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #f43f5e, var(--accent));
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--accent);
+        }
+
+        .card h3 { font-size: 1.1rem; margin-bottom: 10px; color: var(--text-main); }
+        .card p { font-size: 0.9rem; margin-bottom: 0; line-height: 1.5; }
+
+        /* --- CODE BLOCKS TERMINAL --- */
+        .code-container {
+            position: relative;
+            margin: 15px 0 25px 0;
+            background-color: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #161b22; color: #8b949e; padding: 8px 15px; font-size: 0.8rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background-color: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            z-index: 10;
+        }
+        
+        .code-container.has-header .copy-btn {
+            top: auto;
+            position: relative;
+            right: auto;
+            border: none;
+            background: transparent;
+            padding: 0;
+        }
+
+        .copy-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
+        .copy-btn.copied { background-color: var(--success); color: white; border-color: var(--success); padding: 4px 8px; border-radius: 4px;}
+
+        pre { 
+            padding: 15px 20px; 
+            overflow-x: auto; 
+            font-family: 'Consolas', monospace; 
+            font-size: 0.9rem; 
+            line-height: 1.5; 
+            color: #a5d6ff; 
+            /* Smooth scroll buat di HP */
+            -webkit-overflow-scrolling: touch;
+            margin: 0;
+        }
+        
+        /* ====================================================
+           MOBILE RESPONSIVE RULES (Max 768px)
+           ==================================================== */
+        @media screen and (max-width: 768px) {
+            body {
+                display: block; /* Matikan flex body di mobile */
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: sticky;
+                top: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px 0 0 0;
+                background-color: rgba(22, 27, 34, 0.98); /* Efek blur sedikit transparan */
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .sidebar-brand {
+                padding: 0 20px 15px 20px;
+                margin-bottom: 0;
+                border-bottom: none;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .menu-category { display: none; } /* Hilangkan teks kategori biar hemat tempat */
+
+            .nav-list {
+                display: flex;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 0 15px 15px 15px;
+                /* Bikin scroll mulus tanpa terlihat batang scrollbar-nya */
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; 
+            }
+            .nav-list::-webkit-scrollbar { display: none; }
+
+            .nav-item {
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                padding: 8px 15px;
+                margin-right: 10px;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                background-color: var(--bg-card);
+                border: 1px solid var(--border);
+            }
+
+            .nav-item.active {
+                background-color: rgba(234, 179, 8, 0.1);
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 25px 20px 50px 20px;
+            }
+
+            /* Penyesuaian Tipografi Mobile */
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.3rem; margin-top: 30px; }
+            
+            .card-grid { grid-template-columns: 1fr; } /* Kartu jadi 1 baris ke bawah */
+            
+            .step-highlight { padding: 20px 15px; }
+            
+            .btn-yellow { width: 100%; justify-content: center; } /* Tombol full width di HP */
+            
+            pre { font-size: 0.85rem; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= SIDEBAR & MOBILE NAV ================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2><span>JE</span> Jancok Engine</h2>
+        </div>
+
+        <div class="menu-category">Tahap 1: Persiapan</div>
+        <ul class="nav-list" id="nav-container">
+            <li class="nav-item active" onclick="switchSection('setup-webkus', this)">⚙️ Setup Webkus</li>
+            <li class="nav-item" onclick="switchSection('pendahuluan', this)">🚀 Info Bot & Fitur</li>
+            <li class="nav-item" onclick="switchSection('vps', this)">💻 VPS (Server)</li>
+            <li class="nav-item" onclick="switchSection('termux', this)">📱 Termux (HP)</li>
+            <li class="nav-item" onclick="switchSection('cmd', this)">🪟 CMD (Windows)</li>
+            <li class="nav-item" onclick="switchSection('kontak', this)">👨‍💻 Developer</li>
+        </ul>
+    </aside>
+
+    <!-- ================= MAIN CONTENT AREA ================= -->
+    <main class="main-content">
+
+        <!-- SECTION: SETUP WEBKUS -->
+        <section id="setup-webkus" class="section active">
+            <h1>Langkah 1: <span>Setup Webkus</span></h1>
+            <p class="author-text">Persiapan Wajib Sebelum Menyalakan Mesin Jancok Engine</p>
+
+            <div class="info-box warning">
+                <p><strong>Kenapa harus Setup Webkus dulu, Bosku?</strong></p>
+                <p style="margin-bottom:0;">Jancok Engine membaca seluruh data katalog produk langsung dari toko <strong>Webkus</strong> Bosku. Kalau tokonya masih kosong, produk belum ada, atau URL-nya salah, bot Telegram tidak akan bisa menampilkan menu belanja secara otomatis. Ikuti langkah di bawah ini dengan teliti!</p>
+            </div>
+
+            <div class="step-highlight">
+                <h3>Tahap A: Pendaftaran & Profil Toko</h3>
+                <ol>
+                    <li>Buka website resmi Webkus di browser Anda: <a href="https://www.webkus.com/" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">https://www.webkus.com/</a></li>
+                    <li>Lakukan registrasi dengan mengeklik tombol <strong>Buat Toko Sekarang - Gratis</strong>.</li>
+                    <li>Pada tampilan dashboard Webkus, klik menu <strong>UBAH WEBSITE</strong>.</li>
+                    <li>Masukkan <strong>Nama Toko</strong>, <strong>Deskripsi Toko</strong>, <strong>Logo</strong>, dan <strong>URL Kontak</strong>. Kosongkan bagian <i>Webhook URL</i>, kemudian klik <strong>Simpan Perubahan</strong>.</li>
+                    <li>Klik menu <strong>Ganti Nama Domain</strong>. Karena kita akan integrasi dengan bot Telegram, cukup edit bagian <i>Subdomain</i> dan sesuaikan saja dengan nama store kalian. Kemudian klik <strong>Simpan Perubahan</strong>.
+                        <br><br>
+                        <span class="important-text">💡 INFO PENTING:</span> Subdomain inilah yang nantinya wajib dimasukkan ke dalam variabel <code>BASE_URL</code> pada script kode bot!
+                    </li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>Tahap B: Pembuatan Kategori & Produk</h3>
+                <ol>
+                    <li>Lanjut ke proses isi kategori produk. Klik menu <strong>Kategori</strong>.</li>
+                    <li>Masukkan nama kategori (contoh: <i>KLIK INDOMARET</i>) lalu klik tombol <strong>Buat Kategori</strong>.</li>
+                    <li>Lanjut ke proses pembuatan produk. Klik menu <strong>Produk</strong>, lalu pilih kategori di kanan atas yang sudah dibuat tadi, dan klik <strong>Buat Produk</strong>.</li>
+                    <li>Isi data produk: Nama produk, Kategori, Foto produk (bebas), dan Harga. Kosongkan bagian diskon jika memang tidak ada diskon.</li>
+                    <li><span class="important-text">⚠️ WAJIB PERHATIKAN:</span> Pada pilihan jenis produk, pastikan Anda memilih <strong>UNIK</strong> (Jangan pilih DUPLICAT).</li>
+                    <li>Masukkan deskripsi produk, lalu klik <strong>BUAT PRODUK</strong> untuk menyimpan.</li>
+                </ol>
+            </div>
+            
+            <div class="step-highlight">
+                <h3>Tahap C: Pengisian Stok (Import CSV)</h3>
+                <ol>
+                    <li>Masih di menu Produk, silakan cari tulisan <strong>Stock</strong> dan klik tanda <strong>+ (Tambah)</strong> di bawahnya.</li>
+                    <li>Masukkan Syarat dan Ketentuan (SnK) untuk produk tersebut di kolom yang disediakan.</li>
+                    <li>Siapkan file data akun/produk Anda. Jika file awal Anda berformat teks (misal: <code>klik.txt</code>), ubah nama ekstensi file tersebut menjadi <code>klik.csv</code>.</li>
+                    <li>Klik tombol <strong>Import CSV</strong>, lalu masukkan file produk <code>.csv</code> yang sudah disiapkan tadi.</li>
+                    <li>Proses selesai (Done)! Stok akan otomatis terisi.</li>
+                </ol>
+            </div>
+
+            <div class="info-box success">
+                <p style="margin-bottom:0;"><strong>🎉 Toko Webkus Sudah Siap!</strong> Setelah produk, harga, dan stok CSV berhasil diatur, Bosku siap untuk merakit botnya. Silakan lanjut ke halaman Info Bot!</p>
+            </div>
+            
+            <button class="btn-yellow" onclick="switchSection('pendahuluan', document.querySelectorAll('.nav-item')[1])">Lanjut ke Info Bot ➔</button>
+
+        </section>
+
+        <!-- SECTION: PENDAHULUAN & FITUR -->
+        <section id="pendahuluan" class="section">
+            <h1>Tentang <span>Jancok Engine V104</span></h1>
+            <p class="author-text">Mesin Cuan Anti-Limit & Super Ngebut</p>
+
+            <p>Dokumentasi ini dibuat sebagai panduan lengkap cara merakit dan menjalankan script <strong>Jancok Engine V104 (Final Masterpiece)</strong>.</p>
+
+            <div class="info-box">
+                <p><strong>🖥️ Base Mesin:</strong> Node.js (V8 Engine)</p>
+                <p><strong>📦 Framework:</strong> Telegraf.js & Axios</p>
+                <p style="margin-bottom:0;"><strong>🗄️ Database:</strong> Local Flat-File (<code>sessions.json</code>, <code>users.txt</code>)</p>
+            </div>
+
+            <h2>Fitur Utama & Keunggulan</h2>
+            <p>Mesin ini menanamkan sistem <i>Smart Cache</i> dan algoritma <i>Asynchronous</i> agar bot sangat "Badak" melayani ribuan pembeli 24 jam nonstop.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">🛍️</div>
+                    <h3>Auto-Payment & Delivery</h3>
+                    <p>Bot melakukan polling (pengecekan) pembayaran ke Webkus setiap 8 detik dan mengirim data akun secara instan ke Telegram jika saldo terkonfirmasi.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🛡️</div>
+                    <h3>Smart Cache (Anti-Limit 429)</h3>
+                    <p>Sistem memori pintar yang menahan spam klik tombol + / - dari pelanggan. Dijamin 100% bebas dari blokir (Error 429) Cloudflare Webkus.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⌨️</div>
+                    <h3>Input Qty Manual Bersih</h3>
+                    <p>Pelanggan bisa menekan tombol "Isi Manual" dan mengetik angka borongan (misal: 100). Chat otomatis dibersihkan agar riwayat Telegram tetap rapi.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📣</div>
+                    <h3>Broadcast Admin Pro</h3>
+                    <p>Admin bisa menyebarkan promosi (Teks, Foto, Video, Suara, File). Dilengkapi sistem <i>Flood Control</i> (Jeda aman) agar bot terhindar dari Banned API Telegram.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📜</div>
+                    <h3>Smart Pagination UI</h3>
+                    <p>Menu Riwayat dan Testimoni menggunakan sistem Halaman (Next/Prev). Mencegah bot mogok akibat batas maksimal huruf pesan Telegram (4000 karakter).</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🤖</div>
+                    <h3>Global Error Shield</h3>
+                    <p>Tameng gaib <code>bot.catch()</code> menelan semua error jaringan/API secara diam-diam. Log PM2 Bosku dijamin bersih tanpa tulisan error merah sedikitpun.</p>
+                </div>
+            </div>
+            
+            <h2 style="margin-top: 40px;">🔑 Konsep Kunci: Konfigurasi Wajib</h2>
+            <div class="info-box danger">
+                <p>Sebelum menjalankan bot di metode manapun (VPS/Termux/CMD), Bosku <strong>WAJIB HUKUMNYA</strong> untuk mengedit 3 baris kode di bagian paling atas script <code>bot.js</code> yang diberikan oleh Admin. Jika tidak, bot tidak akan terhubung.</p>
+                <ul>
+                    <li><code>BOT_TOKEN</code> : Dari bot <strong>@BotFather</strong> di Telegram.</li>
+                    <li><code>ADMIN_ID</code> : ID Telegram pribadi Bosku (Berupa deretan angka, cek di @userinfobot).</li>
+                    <li><code>BASE_URL</code> : Link toko Webkus Bosku (Contoh: <code>https://toko-bosku.webkus.com</code> tanpa garis miring di akhir).</li>
+                </ul>
+            </div>
+            
+            <p>Pilih OS (Sistem) yang Bosku gunakan untuk menjalankan bot di menu navigasi ya!</p>
+        </section>
+
+        <!-- ================= SECTION: VPS ================= -->
+        <section id="vps" class="section">
+            <h1>Instalasi di <span>VPS (Linux)</span></h1>
+            <p class="author-text">Sangat Disarankan - Untuk Performa 24/7 Terbaik dan Super Ngebut</p>
+
+            <div class="info-box warning">
+                <p><strong>💡 Catatan Penting:</strong></p>
+                <p style="margin-bottom:0;">Panduan ini dikhususkan untuk VPS dengan OS <strong>Ubuntu</strong> atau <strong>Debian</strong>. Pastikan Bosku sudah login ke VPS menggunakan aplikasi SSH (seperti <strong>Termius</strong> di HP, <strong>PuTTY</strong> di PC, atau Terminal bawaan).</p>
+            </div>
+
+            <div class="step-highlight">
+                <h3>1. Persiapan Sistem & Install Mesin Utama (Node.js)</h3>
+                <p>Kita harus memastikan server dalam kondisi terbaru dan menginstal Node.js versi 20 (LTS) sebagai "mesin" jalannya bot.</p>
+                <ul>
+                    <li>Ketik/Copy perintah di bawah ini satu per satu.</li>
+                    <li>Tekan <strong>[ENTER]</strong> setiap selesai satu baris.</li>
+                    <li>Jika ada pertanyaan (Y/n) saat proses instalasi, ketik <strong>y</strong> lalu Enter.</li>
+                </ul>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Terminal VPS (SSH)</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>sudo apt update && sudo apt upgrade -y
+sudo apt install curl -y
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs</code></pre>
+                </div>
+            </div>
+
+            <div class="step-highlight">
+                <h3>2. Buat "Gudang" Bot & Install Modul</h3>
+                <p>Kita buat folder khusus agar file bot tidak berantakan, lalu mengunduh modul pendukung (Telegraf & Axios).</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Terminal VPS (SSH)</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>mkdir jancok-store && cd jancok-store
+npm install telegraf axios</code></pre>
+                </div>
+            </div>
+
+            <div class="step-highlight">
+                <h3>3. Masukkan & Edit Script Bot</h3>
+                <p>Sekarang saatnya memasukkan kode bot sakti V104 ke dalam server.</p>
+                <ol>
+                    <li>Buka teks editor Nano dengan mengetik:
+                        <div class="code-container"><button class="copy-btn" onclick="copyCode(this)" style="top: 5px;">Copy</button>
+                        <pre style="padding: 10px;"><code>nano bot.js</code></pre></div>
+                    </li>
+                    <li>Layar terminal akan berubah menjadi hitam kosong. <strong>PASTE (Tempel)</strong> seluruh kode script <code>bot.js</code> ke layar tersebut (Gunakan <em>Klik Kanan</em> jika di PuTTY PC, atau <em>Long Press -> Paste</em> di Termius HP).</li>
+                    <li><span class="important-text">WAJIB:</span> Gunakan tombol panah di keyboard untuk mencari dan mengubah bagian <code>BOT_TOKEN</code>, <code>ADMIN_ID</code>, dan <code>BASE_URL</code> sesuai data toko Bosku.</li>
+                    <li><strong>Cara Save (Menyimpan):</strong>
+                        <ul>
+                            <li>Tekan tombol <strong>CTRL + X</strong> secara bersamaan.</li>
+                            <li>Akan muncul pertanyaan di bawah <em>"Save modified buffer?"</em>, tekan tombol <strong>Y</strong>.</li>
+                            <li>Terakhir, tekan <strong>ENTER</strong>.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>4. Menjalankan Bot 24 Jam (Pakai PM2)</h3>
+                <p>Agar bot Bosku jalan otomatis di background dan langsung <strong>nyala sendiri</strong> ketika VPS di-restart (reboot), kita wajib pakai PM2.</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Terminal VPS (SSH)</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>sudo npm install -g pm2
+pm2 start bot.js --name "jancok-store"
+pm2 save
+pm2 startup</code></pre>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--accent);"><em>*Catatan: Saat mengeksekusi <code>pm2 startup</code>, VPS biasanya akan memunculkan sebuah perintah teks panjang di layar. Bosku harus meng-COPY perintah panjang tersebut, lalu PASTE lagi di terminal, dan tekan ENTER.</em></p>
+            </div>
+
+            <div class="info-box success">
+                <p><strong>💡 Perintah Pantau (Monitoring) PM2:</strong></p>
+                <p>Gunakan perintah ini kapan saja untuk mengontrol bot Bosku di VPS:</p>
+                <ul style="margin-bottom:0;">
+                    <li>Melihat pergerakan bot (siapa yang beli): <code>pm2 logs</code> <em>(Untuk keluar layar log, tekan CTRL + C)</em></li>
+                    <li>Restart Bot (kalau habis ganti/edit kode): <code>pm2 restart jancok-store</code></li>
+                    <li>Matikan Bot sementara: <code>pm2 stop jancok-store</code></li>
+                    <li>Melihat status bot (hijau/merah): <code>pm2 list</code></li>
+                    <li>Membersihkan layar log dari error lama: <code>pm2 flush</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ================= SECTION: TERMUX ================= -->
+        <section id="termux" class="section">
+            <h1>Instalasi di <span>Termux (Android)</span></h1>
+            <p class="author-text">Praktis jalankan bot hanya bermodal HP Android tanpa perlu PC/VPS.</p>
+
+            <div class="info-box danger">
+                <p><strong>⚠️ PERINGATAN KERAS:</strong></p>
+                <p style="margin-bottom:0;">Jangan pernah mengunduh aplikasi Termux dari Google Play Store karena versinya sudah mati dan usang (pasti akan error). Unduhlah aplikasi Termux dari <strong>F-Droid</strong> atau langsung dari rilis <strong>GitHub resminya</strong>.</p>
+            </div>
+
+            <div class="step-highlight">
+                <h3>1. Update Sistem & Izin Akses Penyimpanan</h3>
+                <p>Pertama kali buka Termux, kita harus update paket dasarnya dan memberi izin agar Termux bisa menyimpan database pesanan di HP Bosku.</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Aplikasi Termux</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>pkg update && pkg upgrade -y
+termux-setup-storage</code></pre>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9rem;"><em>*Jika saat loading muncul pertanyaan (Y/n), ketik <strong>y</strong> lalu Enter.</em></p>
+                <p style="font-size: 0.9rem;"><em>*Saat menjalankan <code>termux-setup-storage</code>, akan muncul pop-up di layar HP. Pilih <strong>"Izinkan" / "Allow"</strong>.</em></p>
+            </div>
+
+            <div class="step-highlight">
+                <h3>2. Install Mesin Node.js & Modul Utama</h3>
+                <p>Install Node.js sebagai mesin bot, aplikasi <em>nano</em> untuk edit teks, lalu buat folder <code>jancok-store</code>.</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Aplikasi Termux</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>pkg install nodejs nano -y
+mkdir jancok-store && cd jancok-store
+npm install telegraf axios</code></pre>
+                </div>
+            </div>
+
+            <div class="step-highlight">
+                <h3>3. Setting Kode Bot (Wajib Teliti)</h3>
+                <p>Buka layar editor teks untuk memasukkan kode Jancok Engine.</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Aplikasi Termux</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>nano bot.js</code></pre>
+                </div>
+                <ol>
+                    <li>Layar akan berubah hitam. <strong>Paste</strong> seluruh kode script yang sudah diberikan Admin.</li>
+                    <li>Geser menggunakan kursor/keyboard HP ke bagian paling atas. Ubah data <code>BOT_TOKEN</code>, <code>ADMIN_ID</code>, dan <code>BASE_URL</code>.</li>
+                    <li><strong>Cara Save di Termux:</strong>
+                        <ul>
+                            <li>Tekan tombol <strong>CTRL</strong> (biasanya ada di barisan menu keyboard ekstra di atas keyboard HP).</li>
+                            <li>Tekan huruf <strong>X</strong>.</li>
+                            <li>Tekan huruf <strong>Y</strong> (untuk konfirmasi Yes).</li>
+                            <li>Tekan <strong>ENTER</strong>.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>4. Hidupkan Bot Pakai PM2 (Anti-Mati)</h3>
+                <p>Biar bot nggak gampang mati saat aplikasi Termux ditutup atau HP layarnya mati, kita gunakan PM2 dan Wake-Lock.</p>
+                <div class="code-container has-header">
+                    <div class="code-header"><span>Aplikasi Termux</span> <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>termux-wake-lock
+npm install -g pm2
+pm2 start bot.js --name "jancok-store"
+pm2 logs</code></pre>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--success);"><em>*Jika di log (pm2 logs) muncul tulisan "JANCOK ENGINE READY", artinya bot sudah sukses menyala! Tekan CTRL lalu C untuk keluar dari log.</em></p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>🔄 JIKA HP MATI / DI-RESTART:</strong></p>
+                <p style="margin-bottom:0;">Karena Termux ada di HP, kalau HP Bosku mati/reboot, PM2 akan ikut mati. Bosku harus menyalakannya manual lagi. Buka aplikasi Termux lalu ketik:<br>
+                <code>cd jancok-store</code> (lalu Enter)<br>
+                <code>pm2 start bot.js --name "jancok-store"</code> (lalu Enter)</p>
+            </div>
+        </section>
+
+        <!-- ================= SECTION: CMD ================= -->
+        <section id="cmd" class="section">
+            <h1>Instalasi di <span>CMD (Windows/RDP)</span></h1>
+            <p class="author-text">Cocok untuk menjalankan bot di PC, Laptop, atau Virtual Desktop (RDP) Windows.</p>
+
+            <div class="step-highlight">
+                <h3>1. Download & Install Node.js</h3>
+                <p>Kalau di Windows, kita tidak perlu pakai kode untuk install Node.js. Cukup klik-klik saja seperti install game/aplikasi biasa.</p>
+                <ol>
+                    <li>Buka Browser (Chrome/Edge), lalu kunjungi website: <a href="https://nodejs.org/" target="_blank" style="color: var(--accent); font-weight: bold;">https://nodejs.org/</a></li>
+                    <li>Download versi yang bertuliskan <strong>LTS (Recommended for most users)</strong>. <em>(Contoh: V20.x.x LTS)</em>.</li>
+                    <li>Buka file yang di-download (<code>.msi</code>), lalu install dengan mengeklik <strong>Next -> Accept -> Next -> Finish</strong>.</li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>2. Siapkan Folder & File Script</h3>
+                <p>Kita buatkan rumah untuk file botnya.</p>
+                <ol>
+                    <li>Buka <strong>File Explorer</strong> (ikon folder kuning di bawah layar).</li>
+                    <li>Buat folder baru bebas dimana saja, misal di Drive D:, kasih nama foldernya <code>jancok-store</code>.</li>
+                    <li>Masuk ke dalam folder tersebut.</li>
+                    <li>Klik Kanan di area kosong ➔ <strong>New</strong> ➔ <strong>Text Document</strong>.</li>
+                    <li>Ubah nama file tersebut menjadi <strong>bot.js</strong>. <br>
+                    <em>(<strong>PENTING:</strong> Pastikan ekstensi <code>.txt</code> di akhir terhapus. Jika tidak melihat ekstensi <code>.txt</code>, klik menu 'View' di atas File Explorer, centang 'File name extensions')</em>.</li>
+                    <li>Klik Kanan file <code>bot.js</code> ➔ pilih <strong>Open With</strong> ➔ <strong>Notepad</strong>.</li>
+                    <li>Paste seluruh kode Jancok Engine ke dalam Notepad.</li>
+                    <li>Ubah konfigurasi <code>BOT_TOKEN</code>, <code>ADMIN_ID</code>, dan <code>BASE_URL</code> di bagian paling atas kode.</li>
+                    <li>Tekan <strong>CTRL + S</strong> untuk menyimpan (Save), lalu tutup Notepad.</li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>3. Buka CMD & Install Library</h3>
+                <p>Ini adalah trik cepat membuka CMD yang langsung mengarah ke folder bot Bosku.</p>
+                <ol>
+                    <li>Kembali ke File Explorer, di dalam folder <code>jancok-store</code> tadi.</li>
+                    <li>Klik pada kotak <strong>Address Bar</strong> (kotak panjang yang menampilkan lokasi folder di bagian atas).</li>
+                    <li>Hapus semua tulisan di kotak tersebut, ketik <code>cmd</code>, lalu tekan <strong>ENTER</strong>. Jendela CMD hitam akan langsung terbuka!</li>
+                    <li>Di layar hitam CMD, ketik perintah ini untuk menginstal modul pendukung, lalu tekan Enter:
+                        <div class="code-container"><button class="copy-btn" onclick="copyCode(this)" style="top: 5px;">Copy</button>
+                        <pre style="padding: 10px;"><code>npm install telegraf axios</code></pre></div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="step-highlight">
+                <h3>4. Jalanin Mesin & Penjaga PM2</h3>
+                <p>Agar bot tidak otomatis mati jika jendela CMD tidak sengaja tertutup (close), kita wajib memasang <strong>PM2</strong>.</p>
+                <ol>
+                    <li>Di jendela CMD yang sama, install PM2:
+                        <div class="code-container"><button class="copy-btn" onclick="copyCode(this)" style="top: 5px;">Copy</button>
+                        <pre style="padding: 10px;"><code>npm install pm2 -g</code></pre></div>
+                    </li>
+                    <li>Mulai jalankan bot secara permanen di <i>background</i> Windows:
+                        <div class="code-container"><button class="copy-btn" onclick="copyCode(this)" style="top: 5px;">Copy</button>
+                        <pre style="padding: 10px;"><code>pm2 start bot.js --name "jancok-store"</code></pre></div>
+                    </li>
+                    <li>Cek log untuk memastikan bot menyala tanpa masalah:
+                        <div class="code-container"><button class="copy-btn" onclick="copyCode(this)" style="top: 5px;">Copy</button>
+                        <pre style="padding: 10px;"><code>pm2 logs</code></pre></div>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="info-box success">
+                <p><strong>🎉 STATUS: BERHASIL!</strong></p>
+                <p style="margin-bottom:0;">Bot Bosku sekarang sudah siap menerima pesanan 24 jam nonstop selama PC/RDP terkoneksi dengan jaringan internet. Gunakan <code>pm2 stop jancok-store</code> jika ingin mematikan bot sewaktu-waktu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION: KONTAK -->
+        <section id="kontak" class="section">
+            <h1>Hubungi <span>Developer</span></h1>
+            <p class="author-text">Butuh bantuan teknis, mau custom fitur, atau error tidak wajar?</p>
+
+            <div class="card" style="max-width: 400px; text-align: center; margin: 40px auto; padding: 40px 20px; border-color: var(--accent);">
+                <div class="card-icon" style="font-size: 3.5rem; margin-bottom: 20px; background: none; border: none;">👨‍💻</div>
+                <h3 style="font-size: 1.8rem; color: var(--accent);">BangLeoNz</h3>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Spesialis Jasa Pembuatan Bot Telegram & Automasi Script Webkus.</p>
+                <a href="https://t.me/BangLeoNz" target="_blank" class="btn-yellow" style="margin-bottom: 0; width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px;">Kirim Pesan Telegram ➔</a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- LOGIC MENU SIDEBAR (Pindah Halaman & Auto-Scroll Mobile) ---
+        function switchSection(sectionId, element) {
+            // Sembunyikan semua section konten
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            // Tampilkan section yang dituju
+            document.getElementById(sectionId).classList.add('active');
+
+            // Hapus status active dari semua menu navigasi
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            // Tambahkan class active ke menu yang baru saja diklik
+            element.classList.add('active');
+            
+            // Logika khusus untuk Mobile: Geser menu horizontal supaya elemen yang diklik ada di tengah layar
+            if (window.innerWidth <= 768) {
+                const navContainer = document.getElementById('nav-container');
+                // Hitung posisi tombol relatif terhadap pembungkusnya, kurangi setengah layar biar ke tengah
+                const scrollPos = element.offsetLeft - (window.innerWidth / 2) + (element.offsetWidth / 2);
+                navContainer.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                
+                // Scroll body ke bawah sedikit biar judul konten terlihat pas di bawah menu sticky
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Untuk Desktop langsung loncat ke atas
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // --- LOGIC TOMBOL COPY KODE ---
+        function copyCode(btn) {
+            // Ambil element kode berdasarkan parent (karena ada yang pake code-header, ada yang enggak)
+            const codeBlock = btn.parentElement.classList.contains('code-header') 
+                ? btn.parentElement.nextElementSibling.innerText 
+                : btn.nextElementSibling.innerText;
+
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "Tersalin!";
+                btn.classList.add("copied");
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove("copied");
+                }, 2000);
+            }).catch(err => {
+                btn.innerText = "Gagal";
+            });
+        }
+    </script>
+</body>
+</html>
